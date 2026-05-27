@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=480">
+  <title>PaletteSniffer - 调色盘嗅探器</title>
+  <style>
+    :root {
+      --bg: #1a1a2e;
+      --surface: #16213e;
+      --card: #0f3460;
+      --accent: #e94560;
+      --text: #eaeaea;
+      --text-muted: #a0a0b8;
+      --border: #2a2a4a;
+      --radius: 10px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 480px;
+      min-height: 400px;
+      max-height: 600px;
+      overflow-y: auto;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    body::-webkit-scrollbar {
+      width: 6px;
+    }
+    body::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    body::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    /* 头部 */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-icon {
+      width: 28px;
+      height: 28px;
+    }
+
+    .header h1 {
+      font-size: 16px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #e94560, #ff6b6b, #ffe66d, #4ecdc4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .btn-analyze {
+      padding: 8px 18px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-analyze:hover {
+      background: #ff5577;
+      transform: translateY(-1px);
+    }
+
+    .btn-analyze:active {
+      transform: translateY(0);
+    }
+
+    .btn-analyze.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 页面信息 */
+    .page-info {
+      padding: 10px 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* 统计栏 */
+    .stats-bar {
+      display: flex;
+      gap: 12px;
+      padding: 12px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-item {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      background: var(--card);
+      border-radius: 8px;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* 区域标题 */
+    .section {
+      padding: 16px 20px 8px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* 调色板 */
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      padding: 0 20px 16px;
+    }
+
+    .color-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid var(--border);
+    }
+
+    .color-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border-color: var(--accent);
+    }
+
+    .color-swatch {
+      height: 50px;
+      position: relative;
+    }
+
+    .color-swatch .copy-hint {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      font-size: 11px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .color-card:hover .copy-hint {
+      opacity: 1;
+    }
+
+    .color-info {
+      padding: 6px 8px;
+    }
+
+    .color-hex {
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+
+    .color-name {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .color-percent {
+      font-size: 10px;
+      color: var(--accent);
+      margin-top: 1px;
+    }
+
+    /* 主色预览 */
+    .dominant-preview {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 20px;
+      margin: 0 20px 12px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .dominant-swatch {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .dominant-info {
+      flex: 1;
+    }
+
+    .dominant-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .dominant-hex {
+      font-size: 18px;
+      font-weight: 700;
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+
+    .dominant-rgb {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .dominant-copy-btn {
+      padding: 6px 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dominant-copy-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* 配色方案 */
+    .schemes-container {
+      padding: 0 20px 16px;
+    }
+
+    .scheme-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .scheme-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .scheme-header:hover {
+      background: var(--card);
+    }
+
+    .scheme-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .scheme-name-en {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-left: 6px;
+    }
+
+    .scheme-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .scheme-toggle {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+
+    .scheme-toggle.open {
+      transform: rotate(180deg);
+    }
+
+    .scheme-colors {
+      display: flex;
+      height: 0;
+      overflow: hidden;
+      transition: height 0.3s ease;
+    }
+
+    .scheme-colors.expanded {
+      height: 60px;
+    }
+
+    .scheme-color-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      cursor: pointer;
+      transition: flex 0.2s;
+      position: relative;
+    }
+
+    .scheme-color-item:hover {
+      flex: 1.5;
+    }
+
+    .scheme-color-item span {
+      opacity: 0;
+      transition: opacity 0.2s;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+
+    .scheme-color-item:hover span {
+      opacity: 1;
+    }
+
+    /* 空状态 */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .empty-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .empty-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--card);
+      color: var(--text);
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      border: 1px solid var(--accent);
+      transition: transform 0.3s ease;
+      z-index: 100;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* 导出按钮 */
+    .export-bar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .btn-export {
+      flex: 1;
+      padding: 8px 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .btn-export:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* 候选主题色 */
+    .candidate-section {
+      padding: 0 20px 12px;
+    }
+
+    .candidate-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .candidate-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .candidate-card:hover {
+      border-color: #4ECDC4;
+      box-shadow: 0 2px 8px rgba(78, 205, 196, 0.15);
+    }
+
+    .candidate-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .candidate-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .candidate-hex {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+
+    .candidate-name {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .candidate-reason {
+      font-size: 10px;
+      color: #4ECDC4;
+      margin-top: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .candidate-badge {
+      padding: 3px 8px;
+      background: rgba(78, 205, 196, 0.15);
+      color: #4ECDC4;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <!-- 头部 -->
+  <div class="header">
+    <div class="header-left">
+      <svg class="header-icon" viewBox="0 0 128 128">
+        <defs>
+          <linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#FF6B6B"/>
+            <stop offset="50%" style="stop-color:#4ECDC4"/>
+            <stop offset="100%" style="stop-color:#96E6A1"/>
+          </linearGradient>
+        </defs>
+        <circle cx="64" cy="64" r="58" fill="url(#hg)"/>
+        <circle cx="64" cy="64" r="40" fill="white" opacity="0.9"/>
+        <circle cx="44" cy="50" r="6" fill="#FF6B6B"/>
+        <circle cx="64" cy="42" r="6" fill="#FFE66D"/>
+        <circle cx="84" cy="50" r="6" fill="#4ECDC4"/>
+        <circle cx="50" cy="72" r="6" fill="#45B7D1"/>
+        <circle cx="78" cy="72" r="6" fill="#96E6A1"/>
+      </svg>
+      <div>
+        <h1>PaletteSniffer</h1>
+        <div class="header-subtitle">调色盘嗅探器</div>
+      </div>
+    </div>
+    <button class="btn-analyze" id="btnAnalyze">
+      <span id="btnText">嗅探配色</span>
+    </button>
+  </div>
+
+  <!-- 页面信息 -->
+  <div class="page-info" id="pageInfo">点击「嗅探配色」开始分析当前页面</div>
+
+  <!-- 结果区域 -->
+  <div id="resultArea">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🎨</div>
+      <div class="empty-text">等待嗅探...</div>
+      <div class="empty-hint">点击上方按钮分析当前网页配色</div>
+    </div>
+
+    <div id="analysisResult" style="display:none;">
+      <!-- 统计栏 -->
+      <div class="stats-bar" id="statsBar"></div>
+
+      <!-- 主色 -->
+      <div class="section" id="dominantSection" style="display:none;">
+        <div class="section-title">主色调</div>
+      </div>
+      <div class="dominant-preview" id="dominantPreview" style="display:none;"></div>
+
+      <!-- 调色板 -->
+      <div class="section">
+        <div class="section-title">主要配色方案 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">按权重排序 前10种</span></div>
+      </div>
+      <div class="palette-grid" id="paletteGrid"></div>
+
+      <!-- 候选主题色 -->
+      <div class="section" id="candidateSection" style="display:none;">
+        <div class="section-title">候选主题色 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">高饱和度 · 交互元素 · 可能的主题色</span></div>
+      </div>
+      <div class="candidate-section" id="candidateContainer"></div>
+
+      <!-- 配色方案 -->
+      <div class="section" id="schemesSection" style="display:none;">
+        <div class="section-title">配色方案推荐</div>
+      </div>
+      <div class="schemes-container" id="schemesContainer"></div>
+
+      <!-- 导出 -->
+      <div class="export-bar" id="exportBar" style="display:none;">
+        <button class="btn-export" id="btnExportCSS">复制 CSS 变量</button>
+        <button class="btn-export" id="btnExportJSON">复制 JSON</button>
+        <button class="btn-export" id="btnExportSVG">复制色卡</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
