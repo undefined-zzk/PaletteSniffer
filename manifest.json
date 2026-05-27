@@ -1,16 +1,21 @@
 {
   "manifest_version": 3,
   "name": "PaletteSniffer - 调色盘嗅探器",
-  "description": "自动分析当前网页配色，提取主色调并生成配色方案",
+  "description": "自动分析当前网页配色，提取主色调并生成配色方案。支持LAB色彩空间聚类、多维加权算法，精准识别主题色。",
   "version": "1.0.0",
+  "author": "Your Name",
   "icons": {
-    "16": "icons/icon.svg",
-    "48": "icons/icon.svg",
-    "128": "icons/icon.svg"
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
   },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "icons/icon.svg",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    },
     "default_title": "调色盘嗅探器"
   },
   "permissions": [
@@ -19,5 +24,6 @@
   ],
   "background": {
     "service_worker": "background.js"
-  }
+  },
+  "homepage_url": "https://github.com/yourusername/palette-sniffer"
 }
