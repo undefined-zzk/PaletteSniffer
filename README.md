@@ -2,6 +2,14 @@
 
 一款智能网页配色分析工具，自动提取网页主色调并生成专业配色方案。
 
+## 📸 效果展示
+
+<p align="center">
+  <img src="screenshots/screenshot-1.png" alt="主界面" width="400"/>
+  <img src="screenshots/screenshot-2.png" alt="配色分析" width="400"/>
+  <img src="screenshots/screenshot-3.png" alt="配色方案" width="400"/>
+</p>
+
 ## ✨ 核心功能
 
 - 🎨 **智能主色识别** - 基于 LAB 色彩空间和多维加权算法，精准识别网页主题色

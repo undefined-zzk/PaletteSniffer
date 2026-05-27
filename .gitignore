@@ -3,6 +3,13 @@
 *.crx
 *.pem
 
+# 开发文档（不打包到扩展）
+PUBLISH_GUIDE.md
+PRE_PUBLISH_CHECKLIST.md
+generate-icons.html
+package.bat
+package.sh
+
 # 系统文件
 .DS_Store
 .DS_Store?
