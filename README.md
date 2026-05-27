@@ -20,6 +20,9 @@
 
 ## 📦 安装使用
 
+### 从 Chrome Web Store 安装（推荐）
+即将上线...
+
 ### 从源码安装
 1. 下载本项目
 2. 打开 Chrome 浏览器，访问 `chrome://extensions/`
@@ -32,6 +35,40 @@
 2. 点击浏览器工具栏中的扩展图标
 3. 点击"嗅探配色"按钮
 4. 查看分析结果并导出
+
+## 🔧 开发与打包
+
+### 打包扩展
+
+#### Windows 系统
+```bash
+# 双击运行或在命令行执行
+package.bat
+```
+
+#### macOS/Linux 系统
+```bash
+# 添加执行权限（首次）
+chmod +x package.sh
+
+# 运行打包脚本
+./package.sh
+```
+
+打包完成后会生成 `palette-sniffer-v1.0.0.zip` 文件，可直接上传到 Chrome Web Store。
+
+### 发布到 Chrome Web Store
+
+详细发布指南请查看：
+- [PUBLISH_GUIDE.md](PUBLISH_GUIDE.md) - 完整发布流程
+- [PRE_PUBLISH_CHECKLIST.md](PRE_PUBLISH_CHECKLIST.md) - 发布前检查清单
+
+**快速步骤：**
+1. 访问 [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
+2. 支付 $5 注册费（首次）
+3. 上传打包好的 ZIP 文件
+4. 填写商店信息和截图
+5. 提交审核（1-3 个工作日）
 
 ## 🎯 适用场景
 
