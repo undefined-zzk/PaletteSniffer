@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# PaletteSniffer 打包脚本 (macOS/Linux)
+# PaletteSniffer 打包脚本 (macOS/Linux/Git Bash)
 
 echo "========================================"
 echo "  PaletteSniffer 打包脚本"
@@ -25,16 +25,28 @@ fi
 echo "正在打包扩展..."
 echo ""
 
-# 压缩文件
-zip -r "$OUTPUT" \
-    manifest.json \
-    background.js \
-    content.js \
-    popup.html \
-    popup.js \
-    icons \
-    -x "*.DS_Store" \
-    -x "__MACOSX/*"
+# 检测是否在 Windows 环境（检查 PowerShell 是否可用）
+if command -v powershell.exe &> /dev/null; then
+    # Windows 环境，使用 PowerShell
+    echo "检测到 Windows 环境，使用 PowerShell 打包..."
+    powershell.exe -Command "Compress-Archive -Path manifest.json,background.js,content.js,popup.html,popup.js,icons -DestinationPath $OUTPUT -Force"
+elif command -v zip &> /dev/null; then
+    # macOS/Linux 环境，使用 zip
+    echo "使用 zip 命令打包..."
+    zip -r "$OUTPUT" \
+        manifest.json \
+        background.js \
+        content.js \
+        popup.html \
+        popup.js \
+        icons \
+        -x "*.DS_Store" \
+        -x "__MACOSX/*"
+else
+    echo "❌ 错误：未找到 zip 或 PowerShell 命令"
+    echo "请使用 package.bat 脚本或安装 zip 工具"
+    exit 1
+fi
 
 if [ $? -eq 0 ]; then
     echo ""
