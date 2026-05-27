@@ -33,7 +33,6 @@ zip -r "$OUTPUT" \
     popup.html \
     popup.js \
     icons \
-    README.md \
     -x "*.DS_Store" \
     -x "__MACOSX/*"
 

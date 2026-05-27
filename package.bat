@@ -24,7 +24,7 @@ echo 正在打包扩展...
 echo.
 
 REM 使用 PowerShell 压缩文件
-powershell -Command "Compress-Archive -Path manifest.json,background.js,content.js,popup.html,popup.js,icons,README.md -DestinationPath %OUTPUT% -Force"
+powershell -Command "Compress-Archive -Path manifest.json,background.js,content.js,popup.html,popup.js,icons -DestinationPath %OUTPUT% -Force"
 
 if %ERRORLEVEL% EQU 0 (
     echo.
