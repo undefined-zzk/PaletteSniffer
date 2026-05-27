@@ -63,20 +63,27 @@ chmod +x package.sh
 ./package.sh
 ```
 
-打包完成后会生成 `palette-sniffer-v1.0.0.zip` 文件，可直接上传到 Chrome Web Store。
+打包完成后会生成 `palette-sniffer-v1.0.0.zip` 文件，可直接上传到扩展商店。
 
-### 发布到 Chrome Web Store
+### 发布到扩展商店
+
+#### Microsoft Edge 扩展商店（推荐）
+- ✅ **完全免费** - 无需支付注册费
+- ✅ **审核更快** - 1-2 个工作日
+- ✅ **无需信用卡** - 注册即可发布
+
+详细发布指南请查看：[PUBLISH_EDGE_GUIDE.md](PUBLISH_EDGE_GUIDE.md)
+
+#### Chrome Web Store
+- ⚠️ 需要支付 $5 注册费
+- ⚠️ 需要国际信用卡
+- 审核时间：1-3 个工作日
 
 详细发布指南请查看：
 - [PUBLISH_GUIDE.md](PUBLISH_GUIDE.md) - 完整发布流程
 - [PRE_PUBLISH_CHECKLIST.md](PRE_PUBLISH_CHECKLIST.md) - 发布前检查清单
 
-**快速步骤：**
-1. 访问 [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
-2. 支付 $5 注册费（首次）
-3. 上传打包好的 ZIP 文件
-4. 填写商店信息和截图
-5. 提交审核（1-3 个工作日）
+**推荐策略：** 先发布到 Edge（免费），积累用户后再发布到 Chrome。
 
 ## 🎯 适用场景
 
